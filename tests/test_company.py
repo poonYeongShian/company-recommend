@@ -2,8 +2,8 @@ import itertools
 from datetime import UTC, datetime, timedelta
 from functools import reduce
 
-from recsys.company import Company, embedding_text, merge
-from recsys.parsing import CompanyEvent
+from consumer.company import Company, embedding_text, merge
+from consumer.parsing import CompanyEvent
 
 T0 = datetime(2026, 8, 14, 1, 0, tzinfo=UTC)
 REG = "SYN-000001"

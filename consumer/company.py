@@ -14,7 +14,7 @@ from typing import Final, Literal
 
 import numpy as np
 
-from recsys.parsing import CompanyEvent
+from consumer.parsing import CompanyEvent
 
 Status = Literal["active", "struck_off"]
 _DATA_FIELDS: Final = ("name", "description", "industry", "state")

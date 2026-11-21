@@ -6,12 +6,11 @@ here is defensive. Rejected messages are not dropped: the consumer stores them i
 """
 
 import json
-import re
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta, timezone
 from typing import Any, Final, Literal
 
-REG_NO_PATTERN: Final = re.compile(r"SYN-\d{6}")
+from common.registration import InvalidRegistrationNumber, parse_registration_number
 
 # Timestamps without an offset: a guess. The feed is Malaysian and 2,428 of its timestamps say +08:00 (28 say Z).
 ASSUMED_TZ: Final = timezone(timedelta(hours=8))
@@ -61,7 +60,7 @@ def parse_message(body: bytes, now: datetime | None = None) -> CompanyEvent:
     if kind is None:
         raise InvalidMessage(f"unknown event type: {raw.get('type')!r}")
 
-    registration_number = parse_registration_number(raw.get("registrationNumber"))
+    registration_number = _registration_number(raw.get("registrationNumber"))
     updated_at = _parse_timestamp(raw.get("updatedAt"), now or datetime.now(UTC))
 
     if kind == "struck_off":
@@ -84,15 +83,11 @@ def parse_message(body: bytes, now: datetime | None = None) -> CompanyEvent:
     )
 
 
-def parse_registration_number(value: Any) -> str:
-    if value is None:
-        raise InvalidMessage("missing registrationNumber")
-    if not isinstance(value, str):
-        raise InvalidMessage(f"registrationNumber must be a string, got {value!r}")
-    normalised = value.strip().upper()
-    if not REG_NO_PATTERN.fullmatch(normalised):
-        raise InvalidMessage(f"invalid registrationNumber: {value!r}")
-    return normalised
+def _registration_number(value: Any) -> str:
+    try:
+        return parse_registration_number(value)
+    except InvalidRegistrationNumber as error:
+        raise InvalidMessage(str(error)) from error
 
 
 def _parse_timestamp(value: Any, now: datetime) -> datetime:

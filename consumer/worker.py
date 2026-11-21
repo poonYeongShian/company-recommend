@@ -1,7 +1,7 @@
 """Consumes `company-events` and keeps the `companies` table (with embeddings) up to date.
 
-    uv run python -m recsys.consumer                 # run until stopped
-    uv run python -m recsys.consumer --idle-exit 5   # stop once the queue has been empty for 5 seconds
+    uv run python -m consumer                 # run until stopped
+    uv run python -m consumer --idle-exit 5   # stop once the queue has been empty for 5 seconds
 
 Messages are handled in batches. A batch is one database transaction, and its messages are acked only after
 that transaction commits, so a crash redelivers them (safe, because applying an event twice changes nothing).
@@ -19,10 +19,11 @@ import aio_pika
 import psycopg
 from aio_pika.abc import AbstractIncomingMessage
 
-from recsys import config, db
-from recsys.company import embedding_text, merge
-from recsys.embedding import Embedder, FastEmbedder
-from recsys.parsing import CompanyEvent, InvalidMessage, parse_message
+from common import config, db
+from consumer import store
+from consumer.company import embedding_text, merge
+from consumer.embedding import Embedder, FastEmbedder
+from consumer.parsing import CompanyEvent, InvalidMessage, parse_message
 
 QUEUE: Final = "company-events"
 BATCH_SIZE: Final = 100
@@ -60,14 +61,14 @@ async def process_batch(connection: psycopg.AsyncConnection, embedder: Embedder,
 
     async with connection.transaction():
         for incoming, reason in rejected:
-            await db.save_dead_letter(connection, incoming.message_id, reason, incoming.body)
+            await store.save_dead_letter(connection, incoming.message_id, reason, incoming.body)
         if events:
             await _apply_events(connection, embedder, events)
     return BatchResult(applied=len(events), dead_lettered=len(rejected))
 
 
 async def _apply_events(connection: psycopg.AsyncConnection, embedder: Embedder, events: list[CompanyEvent]) -> None:
-    current = await db.load_companies(connection, sorted({e.registration_number for e in events}))
+    current = await store.load_companies(connection, sorted({e.registration_number for e in events}))
     for event in events:  # arrival order; `merge` makes the result independent of it
         current[event.registration_number] = merge(current.get(event.registration_number), event)
 
@@ -79,7 +80,7 @@ async def _apply_events(connection: psycopg.AsyncConnection, embedder: Embedder,
         vectors = await asyncio.to_thread(embedder.embed, [text for _, text in stale])
         embedded = {c.registration_number: replace(c, embedded_text=text, embedding=vector) for (c, text), vector in zip(stale, vectors, strict=True)}
         companies = [embedded.get(c.registration_number, c) for c in companies]
-    await db.save_companies(connection, companies)
+    await store.save_companies(connection, companies)
 
 
 async def process_with_isolation(connection: psycopg.AsyncConnection, embedder: Embedder, batch: list[Incoming]) -> BatchResult:
@@ -100,7 +101,7 @@ async def process_with_isolation(connection: psycopg.AsyncConnection, embedder: 
         except Exception as error:
             log.exception("message %s failed", incoming.message_id)
             async with connection.transaction():
-                await db.save_dead_letter(connection, incoming.message_id, f"processing error: {error!r}", incoming.body)
+                await store.save_dead_letter(connection, incoming.message_id, f"processing error: {error!r}", incoming.body)
             total.dead_lettered += 1
     return total
 

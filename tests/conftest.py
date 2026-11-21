@@ -7,7 +7,7 @@ import pytest
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 
-from recsys import config, db
+from common import config, db
 from tests.helpers import run
 
 TEST_DB = "companies_test"
