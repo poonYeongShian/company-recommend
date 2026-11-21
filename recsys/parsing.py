@@ -61,7 +61,7 @@ def parse_message(body: bytes, now: datetime | None = None) -> CompanyEvent:
     if kind is None:
         raise InvalidMessage(f"unknown event type: {raw.get('type')!r}")
 
-    registration_number = _parse_registration_number(raw.get("registrationNumber"))
+    registration_number = parse_registration_number(raw.get("registrationNumber"))
     updated_at = _parse_timestamp(raw.get("updatedAt"), now or datetime.now(UTC))
 
     if kind == "struck_off":
@@ -84,7 +84,7 @@ def parse_message(body: bytes, now: datetime | None = None) -> CompanyEvent:
     )
 
 
-def _parse_registration_number(value: Any) -> str:
+def parse_registration_number(value: Any) -> str:
     if value is None:
         raise InvalidMessage("missing registrationNumber")
     if not isinstance(value, str):

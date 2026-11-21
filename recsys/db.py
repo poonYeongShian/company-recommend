@@ -38,11 +38,15 @@ ON CONFLICT (registration_number) DO UPDATE SET
 
 async def connect(url: str) -> psycopg.AsyncConnection:
     """Open a connection, creating the schema (and the vector extension) first if needed."""
-    async with await psycopg.AsyncConnection.connect(url, autocommit=True, connect_timeout=CONNECT_TIMEOUT_SECONDS) as setup:
-        await init_schema(setup)
+    await ensure_schema(url)
     connection = await psycopg.AsyncConnection.connect(url, connect_timeout=CONNECT_TIMEOUT_SECONDS)
     await register_vector_async(connection)
     return connection
+
+
+async def ensure_schema(url: str) -> None:
+    async with await psycopg.AsyncConnection.connect(url, autocommit=True, connect_timeout=CONNECT_TIMEOUT_SECONDS) as setup:
+        await init_schema(setup)
 
 
 async def init_schema(connection: psycopg.AsyncConnection) -> None:

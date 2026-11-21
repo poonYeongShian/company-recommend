@@ -22,6 +22,10 @@ publish:
 consumer *args:
     uv run python -m recsys.consumer {{args}}
 
+# Run the "Similar companies" API on http://127.0.0.1:8000 (docs at /docs).
+serve *args:
+    uv run python -m recsys.api {{args}}
+
 # Run the tests (the integration tests need `just up`).
 test:
     uv run pytest
