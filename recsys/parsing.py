@@ -13,7 +13,7 @@ from typing import Any, Final, Literal
 
 REG_NO_PATTERN: Final = re.compile(r"SYN-\d{6}")
 
-# Timestamps without an offset: the feed is Malaysian, and every offset-bearing timestamp in it is +08:00.
+# Timestamps without an offset: a guess. The feed is Malaysian and 2,428 of its timestamps say +08:00 (28 say Z).
 ASSUMED_TZ: Final = timezone(timedelta(hours=8))
 
 # Reject timestamps from the future: one bogus `updatedAt` would otherwise win every later comparison.
