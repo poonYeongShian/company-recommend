@@ -29,3 +29,7 @@ serve *args:
 # Run the tests (the integration tests need `just up`).
 test:
     uv run pytest
+
+# Compare embedding models on the stored companies (needs the consumer to have run).
+evaluate:
+    uv run python -m scripts.evaluate_models
