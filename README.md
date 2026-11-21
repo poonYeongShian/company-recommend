@@ -91,15 +91,20 @@ The integration tests use a throwaway `companies_test` database, never the `comp
 ## Layout
 
 ```
-recsys/
+consumer/        # python -m consumer
+  worker.py      # RabbitMQ consumer: batches, ack after commit, dead letters
   parsing.py     # raw message -> clean event, or rejected with a reason
   company.py     # the stored company and the rule for merging events into it
-  consumer.py    # RabbitMQ consumer: batches, ack after commit, dead letters
   embedding.py   # the embedding model
-  db.py          # schema and queries used by the consumer
-  schema.sql     # tables and the HNSW index
-  search.py      # the nearest-neighbour query
+  store.py       # reading and writing companies and dead letters
+service/         # python -m service
   api.py         # FastAPI app
+  search.py      # the nearest-neighbour query
+common/          # used by both
+  config.py      # connection URLs
+  db.py          # connecting, and creating the schema if missing
+  schema.sql     # tables and the HNSW index
+  registration.py  # registration-number normalisation
 scripts/evaluate_models.py   # precision@5 per embedding model
 tests/                       # unit tests, plus integration tests against Postgres
 data/, producer/             # the registry feed and its publisher (unchanged from the template)

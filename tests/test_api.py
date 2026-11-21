@@ -13,8 +13,8 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
-from recsys.api import create_app
-from recsys.embedding import DIMENSIONS
+from service.api import create_app
+from consumer.embedding import DIMENSIONS
 from tests.helpers import consume, event, incoming, run
 
 WHEN = "2026-08-14T09:00:00+08:00"

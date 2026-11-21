@@ -9,9 +9,9 @@ from typing import Any
 import numpy as np
 import psycopg
 
-from recsys import db
-from recsys.consumer import BATCH_SIZE, Incoming, process_with_isolation
-from recsys.embedding import DIMENSIONS
+from common import db
+from consumer.worker import BATCH_SIZE, Incoming, process_with_isolation
+from consumer.embedding import DIMENSIONS
 
 
 class FakeEmbedder:

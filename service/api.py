@@ -1,6 +1,6 @@
 """The "Similar companies" service the portal calls.
 
-    uv run python -m recsys.api            # http://127.0.0.1:8000, docs at /docs
+    uv run python -m service            # http://127.0.0.1:8000, docs at /docs
 
     GET /companies/{registrationNumber}/similar?limit=5
     GET /health
@@ -22,9 +22,9 @@ from psycopg_pool import AsyncConnectionPool
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
-from recsys import config, db
-from recsys.parsing import InvalidMessage, parse_registration_number
-from recsys.search import CompanyNotFound, find_similar
+from common import config, db
+from common.registration import InvalidRegistrationNumber, parse_registration_number
+from service.search import CompanyNotFound, find_similar
 
 DEFAULT_LIMIT: Final = 5
 MAX_LIMIT: Final = 50
@@ -95,7 +95,7 @@ def create_app(database_url: str | None = None, pool_timeout: float = POOL_TIMEO
     ) -> SimilarCompanies:
         try:
             registration_number = parse_registration_number(registration_number)
-        except InvalidMessage as error:
+        except InvalidRegistrationNumber as error:
             raise HTTPException(status_code=422, detail=str(error)) from error
 
         pool: AsyncConnectionPool = request.app.state.pool

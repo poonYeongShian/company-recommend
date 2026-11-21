@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from recsys.parsing import CompanyEvent, InvalidMessage, parse_message
+from consumer.parsing import CompanyEvent, InvalidMessage, parse_message
 
 NOW = datetime(2026, 11, 21, tzinfo=UTC)
 

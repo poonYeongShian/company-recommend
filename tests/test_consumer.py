@@ -10,7 +10,7 @@ from typing import Any
 import psycopg
 import pytest
 
-from recsys.consumer import Incoming
+from consumer.worker import Incoming
 from tests.helpers import FakeEmbedder, consume, event, incoming, run
 
 FEED = Path(__file__).parent.parent / "data" / "feed.jsonl"

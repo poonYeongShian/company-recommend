@@ -59,7 +59,7 @@ industry. The cost is weaker matches for those 39.
 **Struck-off companies are kept and flagged, but never recommended.** This is a judgement call. The requirement says
 every company in the feed should appear in other companies' recommendations, but recommending a company that no longer
 exists is a worse product than leaving it out. Their own page still gets recommendations. Reversing the choice means
-removing one `WHERE` clause in `search.py`. A later upsert re-activates a struck-off company (latest event wins).
+removing one `WHERE` clause in `service/search.py`. A later upsert re-activates a struck-off company (latest event wins).
 
 **Schema.** One `companies` table keyed by registration number, plus `dead_letters`. Source timestamps are stored
 because they decide which value wins. The consumer and the API both create the schema if it is missing, behind an

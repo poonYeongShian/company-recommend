@@ -16,7 +16,7 @@ import numpy as np
 import psycopg
 from fastembed import TextEmbedding
 
-from recsys import config
+from common import config
 
 MODELS = ("BAAI/bge-small-en-v1.5", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
 K = 5
